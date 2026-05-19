@@ -1,35 +1,162 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# 💪 Personal Trainer
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+A cross-platform fitness app built with **Kotlin Multiplatform** and **Compose Multiplatform**, running natively on both Android and iOS from a single shared codebase.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
-
-### Build and Run Android Application
-
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+The app uses AI to generate personalized workout plans, tracks progress, and adapts over time based on the user's goals and performance.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Screenshots
+
+> _Coming soon — Android and iOS screenshots_
+
+---
+
+## Features
+
+- 🤖 **AI-generated workout plans** via Google Gemini API — personalized to your goal, fitness level, and available equipment
+- 📅 **Weekly plan with swipeable cards** — browse upcoming and completed workout days
+- 🏋️ **Active workout screen** — step through exercises, log sets/reps/weight, built-in rest timer
+- 📊 **Progress tracking** — session history, streak counter, monthly workout calendar
+- 🔐 **Firebase Authentication** — email/password login and registration
+- ☁️ **Firestore sync** — user data and plans sync across devices
+- 🎨 **5 color schemes + dark mode** — Ocean, Forest, Sunset, Midnight, Steel, with system/manual override
+- 🔔 **Smart notifications** — reminders fire only on scheduled workout days
+- 📱 **Offline support** — local storage with seamless remote sync
+- 🔄 **Auto plan regeneration** — new plan generated automatically when the week completes
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **UI** | Compose Multiplatform (shared for Android + iOS) |
+| **Language** | Kotlin |
+| **Architecture** | MVVM + Repository pattern |
+| **AI** | Google Gemini API via Ktor REST |
+| **Auth** | Firebase Authentication (gitlive-firebase) |
+| **Remote DB** | Firebase Firestore |
+| **Local storage** | Multiplatform Settings |
+| **Networking** | Ktor Client (OkHttp/Darwin) |
+| **Serialization** | Kotlinx Serialization |
+| **Navigation** | Jetpack Navigation Compose (KMP) |
+| **DI** | Manual (constructor injection) |
+| **Notifications** | AlarmManager (Android) / UNUserNotificationCenter (iOS) |
+
+---
+
+## Architecture
+
+```
+composeApp/
+├── commonMain/          # Shared Kotlin + Compose UI (both platforms)
+│   ├── data/
+│   │   ├── model/       # User, WorkoutPlan, Exercise, WorkoutSession
+│   │   ├── repository/  # GeminiRepository, FirestoreRepository, LocalRepository, AuthRepository
+│   │   └── remote/      # Ktor HTTP client, Gemini API models, prompt builder
+│   ├── presentation/
+│   │   ├── auth/        # Login / Register
+│   │   ├── onboarding/  # 4-step survey + plan generation loading
+│   │   ├── home/        # Next workout card with swipeable days
+│   │   ├── workout/     # Active session, exercise logging, rest timer
+│   │   ├── progress/    # Stats, calendar, session history
+│   │   ├── menu/        # Profile, appearance, notifications, account
+│   │   ├── splash/      # Auth state check + Firestore sync
+│   │   └── theme/       # Color schemes, dark mode preferences
+│   ├── navigation/      # NavGraph with type-safe routes
+│   └── utils/           # expect/actual: time, date, insets, network, notifications, URL opener
+├── androidMain/         # Android-specific implementations
+└── iosMain/             # iOS-specific implementations
+```
+
+---
+
+## Key Engineering Decisions
+
+**Single shared UI** — Compose Multiplatform for all screens. Platform-specific code is limited to `expect/actual` declarations for system APIs (notifications, network, date formatting, URL opening).
+
+**Local-first with remote sync** — Data loads instantly from local storage (Multiplatform Settings), then syncs from Firestore in the background. No loading spinners on app launch for returning users.
+
+**AI prompt engineering** — Gemini receives a structured prompt with user profile data and returns a strict JSON schema. The response is parsed and validated before display. Includes retry logic and quota error handling.
+
+**Theme system** — Five `ColorScheme` presets defined as Material3 `lightColorScheme`/`darkColorScheme` pairs. Selected scheme is persisted and resolved at the root `MaterialTheme` level, so every composable automatically reflects changes.
+
+**Notification scheduling** — Per-day alarms using actual workout schedule (not daily). Alarms are rescheduled weekly after firing, and persist across device reboots via `BOOT_COMPLETED` broadcast on Android.
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Android Studio Ladybug or later
+- Xcode 15+ (for iOS)
+- JDK 17
+- CocoaPods (`gem install cocoapods`)
+
+### Setup
+
+1. **Clone the repo**
+```bash
+git clone https://github.com/Froyder/PersonalTrainer.git
+cd PersonalTrainer
+```
+
+2. **Add your API keys**
+
+Create `local.properties` in the project root:
+```properties
+gemini_api_key=YOUR_GEMINI_API_KEY
+```
+Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com)
+
+3. **Add Firebase config files**
+- Place `google-services.json` in `composeApp/`
+- Place `GoogleService-Info.plist` in `iosApp/iosApp/`
+
+Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com) with:
+- Authentication (Email/Password enabled)
+- Firestore Database
+
+4. **Install iOS dependencies**
+```bash
+cd iosApp
+pod install
+```
+
+5. **Run**
+- **Android** — open in Android Studio, run on device/emulator
+- **iOS** — open `iosApp/iosApp.xcworkspace` in Xcode, run on simulator
+
+---
+
+## What I Learned
+
+This project was built as a deep dive into Kotlin Multiplatform in a real-world context. Key takeaways:
+
+- **KMP maturity** — The ecosystem is production-ready for business logic and networking. Compose Multiplatform for UI is solid on Android and iOS, with some platform quirks around system APIs.
+- **expect/actual** — Powerful but requires discipline. Keeping platform implementations thin and pushing logic into `commonMain` is the right approach.
+- **Firebase on KMP** — The gitlive-firebase wrapper works well but iOS requires CocoaPods integration, which adds friction to the build setup.
+- **Compose state management** — Single source of truth via `StateFlow` + `collectAsState()` scales cleanly across a multi-screen app.
+- **AI integration** — Prompt engineering matters. Strict JSON schema instructions and response cleaning (stripping markdown fences) are essential for reliable parsing.
+
+---
+
+## Roadmap
+
+- [ ] App Store / Google Play release
+- [ ] Weight progress chart
+- [ ] Custom exercise builder
+- [ ] Multiple concurrent plans
+- [ ] Workout sharing / social features
+- [ ] Apple Watch / Wear OS companion
+
+---
+
+## License
+
+MIT License — feel free to use this as a reference or starting point for your own KMP project.
+
+---
+
+_Built with ❤️ using Kotlin Multiplatform_
