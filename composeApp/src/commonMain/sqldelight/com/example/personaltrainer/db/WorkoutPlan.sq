@@ -1,0 +1,17 @@
+CREATE TABLE WorkoutPlanEntity (
+id TEXT NOT NULL PRIMARY KEY,
+userId TEXT NOT NULL,
+generatedAt INTEGER NOT NULL,
+planJson TEXT NOT NULL
+);
+
+insertPlan:
+INSERT OR REPLACE INTO WorkoutPlanEntity(id, userId, generatedAt, planJson)
+VALUES (?, ?, ?, ?);
+
+getPlanByUserId:
+SELECT * FROM WorkoutPlanEntity WHERE userId = ? LIMIT 1;
+
+deletePlan:
+DELETE FROM WorkoutPlanEntity WHERE userId = ?;
+

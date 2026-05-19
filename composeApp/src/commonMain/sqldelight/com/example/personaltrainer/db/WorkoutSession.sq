@@ -1,0 +1,23 @@
+CREATE TABLE WorkoutSessionEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    planId TEXT NOT NULL,
+    trainingDayId TEXT NOT NULL,
+    startedAt INTEGER NOT NULL,
+    completedAt INTEGER,
+    sessionJson TEXT NOT NULL,
+    isCompleted INTEGER NOT NULL DEFAULT 0
+);
+
+insertSession:
+INSERT OR REPLACE INTO WorkoutSessionEntity(id, planId, trainingDayId, startedAt, completedAt, sessionJson, isCompleted)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+getAllSessions:
+SELECT * FROM WorkoutSessionEntity ORDER BY startedAt DESC;
+
+getCompletedSessions:
+SELECT * FROM WorkoutSessionEntity WHERE isCompleted = 1 ORDER BY startedAt DESC;
+
+getSessionsForPlan:
+SELECT * FROM WorkoutSessionEntity WHERE planId = ? ORDER BY startedAt DESC;
+
