@@ -8,7 +8,20 @@ The app uses AI to generate personalized workout plans, tracks progress, and ada
 
 ## Screenshots
 
-> _Coming soon — Android and iOS screenshots_
+### Home
+| Workout Card | Exercise Details |
+|---|---|
+| ![Home](screenshots/home.png) | ![Home Details](screenshots/home-details.png) |
+
+### Active Workout
+| Exercise Logging | Rest Timer |
+|---|---|
+| ![Workout](screenshots/workout-active.png) | ![Rest](screenshots/workout-pause.png) |
+
+### Progress & Menu
+| Progress | Menu (top) | Menu (bottom) |
+|---|---|---|
+| ![Progress](screenshots/progress.png) | ![Menu Top](screenshots/menu-top.png) | ![Menu Bottom](screenshots/menu-bottom.png) |
 
 ---
 
@@ -158,5 +171,3 @@ This project was built as a deep dive into Kotlin Multiplatform in a real-world 
 MIT License — feel free to use this as a reference or starting point for your own KMP project.
 
 ---
-
-_Built with ❤️ using Kotlin Multiplatform_
