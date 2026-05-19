@@ -1,6 +1,8 @@
 package com.froyder.personaltrainer.presentation.workout
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -58,6 +65,7 @@ fun WorkoutScreen(
     trainingDay: TrainingDay,
     planId: String,
     userId: String,
+    onBack: () -> Unit,
     onFinish: () -> Unit,
     onSaveSession: (WorkoutSession) -> Unit
 ) {
@@ -78,6 +86,8 @@ fun WorkoutScreen(
     val currentExercise = trainingDay.exercises[state.currentExerciseIndex]
     val isLastExercise = state.currentExerciseIndex == trainingDay.exercises.lastIndex
 
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,19 +95,48 @@ fun WorkoutScreen(
             .verticalScroll(scrollState)
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        // Header
-        Text(
-            text = "Active",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 1.5.sp
-        )
-        Text(
-            text = trainingDay.focusLabel.uppercase(),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        // Back button + header row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(35.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable(onClick = onBack),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(modifier = Modifier.size(13.dp)) {
+                    val path = Path().apply {
+                        moveTo(size.width * 0.7f, 0f)
+                        lineTo(size.width * 0.2f, size.height * 0.5f)
+                        lineTo(size.width * 0.7f, size.height)
+                    }
+                    drawPath(
+                        path = path,
+                        color = primaryColor,
+                        style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
+                    )
+                }
+            }
+
+            Column (modifier = Modifier.padding(start = 10.dp)) {
+                Text(
+                    text = "Active",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.5.sp
+                )
+                Text(
+                    text = trainingDay.focusLabel.uppercase(),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
 
         Spacer(Modifier.height(16.dp))
 

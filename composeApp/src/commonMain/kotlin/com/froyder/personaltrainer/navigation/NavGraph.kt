@@ -294,6 +294,7 @@ fun NavGraph(
                     trainingDay = trainingDay,
                     planId = plan.id,
                     userId = authViewModel.currentUserId,
+                    onBack = { navController.popBackStack() },
                     onFinish = {
                         appViewModel.markDayCompleted(trainingDay.id)
                         navController.navigate(Screen.Home.route) {
