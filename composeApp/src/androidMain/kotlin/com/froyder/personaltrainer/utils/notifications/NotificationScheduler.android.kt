@@ -3,19 +3,24 @@ package com.froyder.personaltrainer.utils.notifications
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.froyder.personaltrainer.data.local.appContext
+import com.froyder.personaltrainer.mainActivity
 
 actual class NotificationScheduler actual constructor() {
     actual fun requestPermission() {
-        // On Android 13+ permission must be requested at runtime
-        // For now we check — full runtime request needs Activity context
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val granted = ContextCompat.checkSelfPermission(
-                appContext, Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-            if (!granted) {
-                // Permission will be requested when user enables notifications in Menu
+            if (ContextCompat.checkSelfPermission(
+                    appContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    mainActivity,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
             }
         }
     }

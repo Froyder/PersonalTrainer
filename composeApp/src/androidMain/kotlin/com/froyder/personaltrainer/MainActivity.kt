@@ -7,10 +7,13 @@ import com.froyder.personaltrainer.data.local.appContext
 import com.froyder.personaltrainer.data.local.createSettings
 import com.froyder.personaltrainer.data.repository.LocalRepository
 
+lateinit var mainActivity: MainActivity
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appContext = applicationContext  // 👈 add this
+        appContext = applicationContext
+        mainActivity = this
         setContent {
             App(localRepository = LocalRepository(createSettings()))
         }

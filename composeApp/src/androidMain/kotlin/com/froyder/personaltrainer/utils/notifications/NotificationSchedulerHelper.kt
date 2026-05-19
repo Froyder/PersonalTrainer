@@ -54,7 +54,7 @@ object NotificationSchedulerHelper {
                 if (before(Calendar.getInstance())) add(Calendar.WEEK_OF_YEAR, 1)
             }
 
-            alarmManager.setExactAndAllowWhileIdle(
+            alarmManager.setAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 calendar.timeInMillis,
                 pendingIntent

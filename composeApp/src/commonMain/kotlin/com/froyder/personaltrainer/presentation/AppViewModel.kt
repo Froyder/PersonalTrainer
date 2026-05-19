@@ -9,6 +9,7 @@ import com.froyder.personaltrainer.data.repository.FirestoreRepository
 import com.froyder.personaltrainer.data.repository.GeminiRepository
 import com.froyder.personaltrainer.data.repository.LocalRepository
 import com.froyder.personaltrainer.utils.getCurrentTimeMillis
+import com.froyder.personaltrainer.utils.notifications.NotificationScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,6 +23,8 @@ class AppViewModel(
     init {
 
     }
+
+    private val notificationScheduler = NotificationScheduler()
 
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser = _currentUser.asStateFlow()
@@ -85,6 +88,22 @@ class AppViewModel(
             } else if (remoteUser != null && _planState.value !is PlanGenerationState.Success) {
                 regeneratePlan()
             }
+
+            if (remoteUser != null && remoteUser.notificationsEnabled) {
+                notificationScheduler.requestPermission()
+                notificationScheduler.scheduleForDays(
+                    days = _planState.value
+                        .let { it as? PlanGenerationState.Success }
+                        ?.plan
+                        ?.weeklyDays
+                        ?.map { it.dayLabel }
+                        ?: emptyList(),
+                    hour = remoteUser.reminderHour,
+                    minute = remoteUser.reminderMinute,
+                    title = "Personal Trainer",
+                    message = "Time to work out! Your session is ready 💪"
+                )
+            }
         } catch (e: Exception) {
             println("DEBUG: Firestore sync failed: ${e.message}")
         }
@@ -114,8 +133,6 @@ class AppViewModel(
         }
     }
 
-    fun regeneratePlanPublic() = regeneratePlan()
-
     private fun regeneratePlan() {
         val user = _currentUser.value ?: return
         viewModelScope.launch {
@@ -125,6 +142,16 @@ class AppViewModel(
                 localRepository.savePlan(newPlan)
                 firestoreRepository.savePlan(newPlan)
                 _planState.value = PlanGenerationState.Success(newPlan)
+
+                if (user.notificationsEnabled) {
+                    notificationScheduler.scheduleForDays(
+                        days = newPlan.weeklyDays.map { it.dayLabel },
+                        hour = user.reminderHour,
+                        minute = user.reminderMinute,
+                        title = "Personal Trainer",
+                        message = "Time to work out! Your session is ready 💪"
+                    )
+                }
             } catch (e: Exception) {
                 _planState.value = PlanGenerationState.Error(e.message ?: "Failed to generate plan")
             }
