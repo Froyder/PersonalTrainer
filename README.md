@@ -121,7 +121,25 @@ Create `local.properties` in the project root:
 ```properties
 gemini_api_key=YOUR_GEMINI_API_KEY
 ```
+
 Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com)
+
+Both platform-specific API config files are gitignored and must be created manually:
+
+**Android** — create `composeApp/src/androidMain/kotlin/com/froyder/personaltrainer/data/remote/ApiConfig.android.kt`
+
+    package com.froyder.personaltrainer.data.remote
+    import com.froyder.personaltrainer.BuildConfig
+    actual fun getGeminiApiKey(): String = BuildConfig.GEMINI_API_KEY
+
+This reads the key from `local.properties` via `BuildConfig` — no hardcoded value needed.
+
+**iOS** — create `composeApp/src/iosMain/kotlin/com/froyder/personaltrainer/data/remote/ApiConfig.ios.kt`
+
+    package com.froyder.personaltrainer.data.remote
+    actual fun getGeminiApiKey(): String = "YOUR_GEMINI_API_KEY_HERE"
+
+Replace `YOUR_GEMINI_API_KEY_HERE` with your actual key.
 
 3. **Add Firebase config files**
 - Place `google-services.json` in `composeApp/`
