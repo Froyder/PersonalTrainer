@@ -146,8 +146,8 @@ Replace `YOUR_GEMINI_API_KEY_HERE` with your actual key.
 - Place `GoogleService-Info.plist` in `iosApp/iosApp/`
 
 Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com) with:
-- Authentication (Email/Password enabled)
-- Firestore Database
+- Authentication → Sign-in method → Email/Password enabled
+- Firestore Database → Start in test mode → add security rules from `firestore.rules`
 
 4. **Install iOS dependencies**
 ```bash
