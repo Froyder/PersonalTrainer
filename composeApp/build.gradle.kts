@@ -104,6 +104,30 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(localProperties["KEYSTORE_PATH"] as String)
+            storePassword = localProperties["KEYSTORE_PASSWORD"] as String
+            keyAlias = localProperties["KEY_ALIAS"] as String
+            keyPassword = localProperties["KEY_PASSWORD"] as String
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        getByName("debug") {
+            isMinifyEnabled = false
+        }
+    }
 }
 
 dependencies {
