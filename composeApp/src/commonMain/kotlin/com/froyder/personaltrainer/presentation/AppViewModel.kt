@@ -8,6 +8,7 @@ import com.froyder.personaltrainer.data.model.WorkoutSession
 import com.froyder.personaltrainer.data.repository.FirestoreRepository
 import com.froyder.personaltrainer.data.repository.GeminiRepository
 import com.froyder.personaltrainer.data.repository.LocalRepository
+import com.froyder.personaltrainer.utils.CrashReporter
 import com.froyder.personaltrainer.utils.getCurrentTimeMillis
 import com.froyder.personaltrainer.utils.notifications.NotificationScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +41,8 @@ class AppViewModel(
 
     fun initForUser(userId: String) {
         if (userId.isBlank()) return
+
+        CrashReporter.setUserId(userId)
 
         viewModelScope.launch {
             _syncState.value = SyncState.Syncing
@@ -105,6 +108,7 @@ class AppViewModel(
                 )
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             println("DEBUG: Firestore sync failed: ${e.message}")
         }
     }
@@ -128,6 +132,7 @@ class AppViewModel(
                 localRepository.savePlan(plan)
                 _planState.value = PlanGenerationState.Success(plan)
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 _planState.value = PlanGenerationState.Error(e.message ?: "Unknown error")
             }
         }

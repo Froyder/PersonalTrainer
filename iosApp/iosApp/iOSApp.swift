@@ -1,11 +1,14 @@
 import SwiftUI
+import FirebaseCore
+import FirebaseCrashlytics
 
 @main
 struct iOSApp: App {
     init() {
-        if let firebaseClass = NSClassFromString("FIRApp") as? NSObject.Type {
-            firebaseClass.perform(NSSelectorFromString("configure"))
-        }
+        FirebaseApp.configure()
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+        
+        Crashlytics.crashlytics().log("iOS Crashlytics test")
     }
 
     var body: some Scene {

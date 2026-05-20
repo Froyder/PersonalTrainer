@@ -3,6 +3,7 @@ package com.froyder.personaltrainer.presentation.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.froyder.personaltrainer.data.repository.AuthRepository
+import com.froyder.personaltrainer.utils.CrashReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ class AuthViewModel(
                 authRepository.login(email, password)
                 _authState.value = AuthState.Success
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
             }
         }
@@ -38,6 +40,7 @@ class AuthViewModel(
                 authRepository.register(email, password)
                 _authState.value = AuthState.Success
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 _authState.value = AuthState.Error(e.message ?: "Registration failed")
             }
         }
