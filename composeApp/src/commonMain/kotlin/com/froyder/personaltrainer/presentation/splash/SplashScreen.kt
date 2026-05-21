@@ -72,7 +72,7 @@ fun SplashScreen(
                     }
                     onNavigate(destination)
                 } catch (e: Exception) {
-                    CrashReporter.recordException(e)  // 👈 report instead of silently failing
+                    CrashReporter.recordException(e)
                     onNavigate(Screen.GoalPicker.route)
                 }
             }

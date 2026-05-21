@@ -281,13 +281,25 @@ fun MenuScreen(
         // --- Plan Section ---
         MenuSectionHeader("Workout Plan")
         MenuCard {
-            MenuActionRow(
-                label = "Regenerate Plan",
-                description = "Go through survey and create a new plan",
-                onClick = onRegeneratePlan,
-                showDivider = false
-            )
+            if (isGuest) {
+                MenuActionRow(
+                    label = "Regenerate Plan",
+                    description = "Login or register to regenerate your plan",
+                    onClick = {},
+                    showDivider = false,
+                    isDestructive = false,
+                    isDisabled = true
+                )
+            } else {
+                MenuActionRow(
+                    label = "Regenerate Plan",
+                    description = "Go through survey and create a new plan",
+                    onClick = onRegeneratePlan,
+                    showDivider = false
+                )
+            }
         }
+
 
         Spacer(Modifier.height(24.dp))
 
@@ -508,12 +520,15 @@ fun MenuActionRow(
     description: String,
     onClick: () -> Unit,
     isDestructive: Boolean = false,
-    showDivider: Boolean = true
+    showDivider: Boolean = true,
+    isDisabled: Boolean = false
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .then(
+                if (isDisabled) Modifier else Modifier.clickable(onClick = onClick)
+            )
             .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -523,7 +538,9 @@ fun MenuActionRow(
                 label,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
-                color = if (isDestructive)
+                color = if (isDisabled)
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                else if (isDestructive)
                     MaterialTheme.colorScheme.error
                 else
                     MaterialTheme.colorScheme.onSurface
@@ -531,17 +548,22 @@ fun MenuActionRow(
             Text(
                 description,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isDisabled)
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Text(
-            "›",
-            style = MaterialTheme.typography.titleLarge,
-            color = if (isDestructive)
-                MaterialTheme.colorScheme.error
-            else
-                MaterialTheme.colorScheme.primary
-        )
+        if (!isDisabled) {
+            Text(
+                "›",
+                style = MaterialTheme.typography.titleLarge,
+                color = if (isDestructive)
+                    MaterialTheme.colorScheme.error
+                else
+                    MaterialTheme.colorScheme.primary
+            )
+        }
     }
     if (showDivider) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -566,7 +588,7 @@ fun ColorSchemeChip(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp)
-                .clip(RoundedCornerShape(10.dp))  // 👈 square with rounded corners
+                .clip(RoundedCornerShape(10.dp))
                 .background(colors.primary)
                 .border(
                     width = if (selected) 2.5.dp else 0.dp,

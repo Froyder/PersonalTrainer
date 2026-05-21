@@ -156,7 +156,7 @@ fun WorkoutScreen(
             restSeconds = restSeconds,
             onLogSet = { setLog ->
                 viewModel.logSet(state.currentExerciseIndex, setLog)
-                viewModel.startRestTimer(currentExercise.restSeconds)  // 👈 start timer
+                viewModel.startRestTimer(currentExercise.restSeconds)
             },
             onSkipRest = { viewModel.skipRestTimer() }
         )

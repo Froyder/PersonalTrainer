@@ -323,7 +323,7 @@ fun NavGraph(
                 val plan = (planState as? PlanGenerationState.Success)?.plan
                     ?: MockData.samplePlan
                 val sessions = appViewModel.getCompletedSessions()
-                val streak = appViewModel.calculateStreak()  // 👈
+                val streak = appViewModel.calculateStreak()
                 ProgressScreen(
                     scrollState = progressScrollState,
                     sessions = sessions,

@@ -197,7 +197,7 @@ fun AuthScreen(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
             // Switch mode
             Row(
@@ -223,11 +223,7 @@ fun AuthScreen(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(30.dp))
 
             Box(
                 modifier = Modifier
@@ -236,7 +232,7 @@ fun AuthScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Continue without account".uppercase(),
+                    text = "Continue without account",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

@@ -98,7 +98,7 @@ fun ProgressScreen(
             StatCard(
                 modifier = Modifier.weight(1f),
                 label = "DAY\nSTREAK",
-                value = "🔥$streak"  // 👈 streak
+                value = "🔥$streak"
             )
         }
 
