@@ -54,7 +54,7 @@ fun App(localRepository: LocalRepository) {
         val navController = remember { mutableStateOf<NavHostController?>(null) }
         LaunchedEffect(Unit) {
             authViewModel.authStateFlow.collect { isLoggedIn ->
-                if (!isLoggedIn) {
+                if (!isLoggedIn && !authViewModel.isGuestMode.value) {
                     appViewModel.clearInMemoryState()
                     onboardingViewModel.reset()
                     authViewModel.reset()

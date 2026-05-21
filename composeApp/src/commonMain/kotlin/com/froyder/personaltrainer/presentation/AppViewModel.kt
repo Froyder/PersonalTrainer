@@ -41,9 +41,7 @@ class AppViewModel(
 
     fun initForUser(userId: String) {
         if (userId.isBlank()) return
-
         CrashReporter.setUserId(userId)
-
         viewModelScope.launch {
             _syncState.value = SyncState.Syncing
 
@@ -52,6 +50,14 @@ class AppViewModel(
 
             if (cachedUser != null) _currentUser.value = cachedUser
             if (cachedPlan != null) _planState.value = PlanGenerationState.Success(cachedPlan)
+
+            if (userId == "guest_local") {
+                if (cachedPlan != null && cachedPlan.weeklyDays.all { it.isCompleted }) {
+                    regeneratePlan()
+                }
+                _syncState.value = SyncState.Done
+                return@launch
+            }
 
             syncFromFirestore(userId)
             _syncState.value = SyncState.Done

@@ -16,8 +16,10 @@ class LocalRepository(val settings: Settings) {
     }
 
     fun getUser(userId: String): User? {
-        val stored = settings.getStringOrNull("user_$userId") ?: return null
-        return try { json.decodeFromString<User>(stored) } catch (e: Exception) { null }
+        val stored = settings.getStringOrNull("user_$userId")
+        return stored?.let {
+            try { json.decodeFromString<User>(it) } catch (e: Exception) { null }
+        }
     }
 
     // --- Plan ---
@@ -63,7 +65,8 @@ class LocalRepository(val settings: Settings) {
     }
 
     fun isGuestMode(): Boolean {
-        return settings.getBooleanOrNull("is_guest_mode") ?: false
+        val value = settings.getBooleanOrNull("is_guest_mode")
+        return value ?: false
     }
 
     fun clearGuestMode() {

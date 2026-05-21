@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.froyder.personaltrainer.presentation.LoadingScreen
+import com.froyder.personaltrainer.utils.CrashReporter
 import personaltrainer.composeapp.generated.resources.Res
 import personaltrainer.composeapp.generated.resources.dumbbell
 
@@ -47,34 +48,36 @@ fun SplashScreen(
 
     LaunchedEffect(Unit) {
         val startTime = getCurrentTimeMillis()
-
         val isGuest = authViewModel.isGuestMode.value
 
         when {
-            // Returning guest — load local data and go home
+            // Guest mode — load local data only, skip Firestore
             isGuest -> {
-                val userId = "guest_local"
-                appViewModel.initForUser(userId)
+                try {
+                    appViewModel.initForUser("guest_local")
+                    var waited = 0L
+                    while (appViewModel.syncState.value != SyncState.Done && waited < 3000L) {
+                        delay(100)
+                        waited += 100
+                    }
 
-                var waited = 0L
-                while (appViewModel.syncState.value != SyncState.Done && waited < 3000L) {
-                    delay(100)
-                    waited += 100
+                    val elapsed = getCurrentTimeMillis() - startTime
+                    val remaining = 1500L - elapsed
+                    if (remaining > 0) delay(remaining)
+
+                    val destination = when {
+                        appViewModel.planState.value is PlanGenerationState.Success -> Screen.Home.route
+                        appViewModel.currentUser.value != null -> Screen.Home.route
+                        else -> Screen.GoalPicker.route
+                    }
+                    onNavigate(destination)
+                } catch (e: Exception) {
+                    CrashReporter.recordException(e)  // 👈 report instead of silently failing
+                    onNavigate(Screen.GoalPicker.route)
                 }
-
-                val elapsed = getCurrentTimeMillis() - startTime
-                val remaining = 1500L - elapsed
-                if (remaining > 0) delay(remaining)
-
-                val destination = when {
-                    appViewModel.planState.value is PlanGenerationState.Success -> Screen.Home.route
-                    appViewModel.currentUser.value != null -> Screen.Home.route
-                    else -> Screen.GoalPicker.route
-                }
-                onNavigate(destination)
             }
 
-            // Not logged in and not guest → Auth
+            // Not logged in → Auth
             !authViewModel.isLoggedIn -> {
                 val elapsed = getCurrentTimeMillis() - startTime
                 val remaining = 1500L - elapsed
@@ -82,21 +85,18 @@ fun SplashScreen(
                 onNavigate(Screen.Auth.route)
             }
 
-            // Logged in user → sync and go home
+            // Logged in user → sync Firestore
             else -> {
                 val userId = authViewModel.currentUserId
                 appViewModel.initForUser(userId)
-
                 var waited = 0L
                 while (appViewModel.syncState.value != SyncState.Done && waited < 5000L) {
                     delay(100)
                     waited += 100
                 }
-
                 val elapsed = getCurrentTimeMillis() - startTime
                 val remaining = 1500L - elapsed
                 if (remaining > 0) delay(remaining)
-
                 val destination = when {
                     appViewModel.planState.value is PlanGenerationState.Success -> Screen.Home.route
                     appViewModel.currentUser.value != null -> Screen.Home.route

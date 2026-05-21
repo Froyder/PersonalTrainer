@@ -18,11 +18,12 @@ class AuthViewModel(
     val authState = _authState.asStateFlow()
 
     private val _isGuestMode = MutableStateFlow(
-        localRepository?.isGuestMode() ?: false  // 👈 load from storage
+        localRepository?.isGuestMode().also {
+        } ?: false
     )
     val isGuestMode = _isGuestMode.asStateFlow()
 
-    val isLoggedIn: Boolean get() = authRepository.currentUser != null || _isGuestMode.value
+    val isLoggedIn: Boolean get() = authRepository.currentUser != null
     val currentUserId: String get() = authRepository.currentUser?.uid ?:
                                         if (_isGuestMode.value) "guest_local" else ""
 

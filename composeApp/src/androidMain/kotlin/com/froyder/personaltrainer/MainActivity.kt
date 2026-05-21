@@ -11,6 +11,10 @@ import com.google.firebase.FirebaseApp
 lateinit var mainActivity: MainActivity
 
 class MainActivity : ComponentActivity() {
+    private val localRepository by lazy {
+        LocalRepository(createSettings())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         appContext = applicationContext
@@ -26,7 +30,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            App(localRepository = LocalRepository(createSettings()))
+            App(localRepository = localRepository)
         }
     }
 }
