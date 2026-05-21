@@ -48,36 +48,63 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         val startTime = getCurrentTimeMillis()
 
-        if (!authViewModel.isLoggedIn) {
-            val elapsed = getCurrentTimeMillis() - startTime
-            val remaining = 1500L - elapsed
-            if (remaining > 0) delay(remaining)
-            onNavigate(Screen.Auth.route)
-            return@LaunchedEffect
+        val isGuest = authViewModel.isGuestMode.value
+
+        when {
+            // Returning guest — load local data and go home
+            isGuest -> {
+                val userId = "guest_local"
+                appViewModel.initForUser(userId)
+
+                var waited = 0L
+                while (appViewModel.syncState.value != SyncState.Done && waited < 3000L) {
+                    delay(100)
+                    waited += 100
+                }
+
+                val elapsed = getCurrentTimeMillis() - startTime
+                val remaining = 1500L - elapsed
+                if (remaining > 0) delay(remaining)
+
+                val destination = when {
+                    appViewModel.planState.value is PlanGenerationState.Success -> Screen.Home.route
+                    appViewModel.currentUser.value != null -> Screen.Home.route
+                    else -> Screen.GoalPicker.route
+                }
+                onNavigate(destination)
+            }
+
+            // Not logged in and not guest → Auth
+            !authViewModel.isLoggedIn -> {
+                val elapsed = getCurrentTimeMillis() - startTime
+                val remaining = 1500L - elapsed
+                if (remaining > 0) delay(remaining)
+                onNavigate(Screen.Auth.route)
+            }
+
+            // Logged in user → sync and go home
+            else -> {
+                val userId = authViewModel.currentUserId
+                appViewModel.initForUser(userId)
+
+                var waited = 0L
+                while (appViewModel.syncState.value != SyncState.Done && waited < 5000L) {
+                    delay(100)
+                    waited += 100
+                }
+
+                val elapsed = getCurrentTimeMillis() - startTime
+                val remaining = 1500L - elapsed
+                if (remaining > 0) delay(remaining)
+
+                val destination = when {
+                    appViewModel.planState.value is PlanGenerationState.Success -> Screen.Home.route
+                    appViewModel.currentUser.value != null -> Screen.Home.route
+                    else -> Screen.GoalPicker.route
+                }
+                onNavigate(destination)
+            }
         }
-
-        val userId = authViewModel.currentUserId
-        appViewModel.initForUser(userId)
-
-        // Wait for sync to complete (max 5 seconds)
-        var waited = 0L
-        while (appViewModel.syncState.value != SyncState.Done && waited < 5000L) {
-            delay(100)
-            waited += 100
-        }
-
-        val elapsed = getCurrentTimeMillis() - startTime
-        val remaining = 1500L - elapsed
-        if (remaining > 0) delay(remaining)
-
-        // Navigate based on data state — never logout here
-        val destination = when {
-            appViewModel.planState.value is PlanGenerationState.Success -> Screen.Home.route
-            appViewModel.currentUser.value != null -> Screen.Home.route  // has user but plan loading
-            else -> Screen.GoalPicker.route  // new user, no data yet
-        }
-
-        onNavigate(destination)
     }
 
     // Loading UI

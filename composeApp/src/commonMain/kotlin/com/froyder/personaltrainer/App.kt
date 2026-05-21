@@ -34,11 +34,14 @@ fun App(localRepository: LocalRepository) {
         colorScheme = resolveColorScheme(preferences.colorScheme, isDark)
     ) {
         val onboardingViewModel = viewModel { OnboardingViewModel() }
-        val authViewModel = viewModel { AuthViewModel() }
+        val authViewModel = viewModel {
+            AuthViewModel(localRepository = localRepository)
+        }
         val appViewModel = viewModel {
             AppViewModel(
                 geminiRepository = GeminiRepository(createHttpClient()),
-                localRepository = localRepository
+                localRepository = localRepository,
+                authViewModel = authViewModel
             )
         }
         val menuViewModel = viewModel {

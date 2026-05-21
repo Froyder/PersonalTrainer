@@ -44,6 +44,7 @@ import com.froyder.personaltrainer.presentation.LoadingScreen
 import com.froyder.personaltrainer.presentation.PlanGenerationState
 import com.froyder.personaltrainer.presentation.auth.AuthScreen
 import com.froyder.personaltrainer.presentation.auth.AuthViewModel
+import com.froyder.personaltrainer.presentation.auth.GuestUpgradeScreen
 import com.froyder.personaltrainer.presentation.common.EmptyPlanScreen
 import com.froyder.personaltrainer.presentation.common.OfflineBanner
 import com.froyder.personaltrainer.presentation.menu.MenuScreen
@@ -68,11 +69,10 @@ sealed class Screen(val route: String) {
     object EquipmentPicker : Screen("onboarding_equipment")
     object PlanLoading : Screen("plan_loading")
     object Home : Screen("home")
-
     object Workout : Screen("workout")
     object Progress : Screen("progress")
-
     object Menu : Screen("menu")
+    object GuestUpgrade : Screen("guest_upgrade")
 }
 
 @Composable
@@ -200,6 +200,12 @@ fun NavGraph(
                             popUpTo(Screen.Auth.route) { inclusive = true }
                         }
                     },
+                    onContinueAsGuest = {
+                        authViewModel.continueAsGuest()
+                        navController.navigate(Screen.GoalPicker.route) {
+                            popUpTo(Screen.Auth.route) { inclusive = true }
+                        }
+                    },
                     viewModel = authViewModel
                 )
             }
@@ -297,8 +303,15 @@ fun NavGraph(
                     onBack = { navController.popBackStack() },
                     onFinish = {
                         appViewModel.markDayCompleted(trainingDay.id)
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
+                        val isGuest = authViewModel.isGuestMode.value
+                        if (isGuest) {
+                            navController.navigate(Screen.GuestUpgrade.route) {
+                                popUpTo(Screen.Home.route) { inclusive = false }
+                            }
+                        } else {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
                         }
                     },
                     onSaveSession = { session ->
@@ -322,6 +335,7 @@ fun NavGraph(
                 MenuScreen(
                     scrollState = menuScrollState,
                     viewModel = menuViewModel,
+                    authViewModel = authViewModel,
                     themeViewModel = themeViewModel,
                     userId = authViewModel.currentUserId,
                     onLogout = {
@@ -348,6 +362,32 @@ fun NavGraph(
                             navController.navigate(Screen.Auth.route) {
                                 popUpTo(0) { inclusive = true }
                             }
+                        }
+                    },
+                    onCreateAccount = {
+                        // Clear guest data and go to Auth
+                        appViewModel.clearInMemoryState()
+                        onboardingViewModel.reset()
+                        authViewModel.exitGuestMode()
+                        navController.navigate(Screen.Auth.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(Screen.GuestUpgrade.route) {
+                GuestUpgradeScreen(
+                    onCreateAccount = {
+                        appViewModel.clearInMemoryState()
+                        onboardingViewModel.reset()
+                        authViewModel.exitGuestMode()
+                        navController.navigate(Screen.Auth.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onSkip = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }
                         }
                     }
                 )

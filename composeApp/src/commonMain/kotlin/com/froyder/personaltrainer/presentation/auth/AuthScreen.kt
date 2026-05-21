@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -45,7 +46,11 @@ import androidx.compose.ui.unit.sp
 import com.froyder.personaltrainer.utils.screenPadding
 
 @Composable
-fun AuthScreen(onAuthSuccess: () -> Unit, viewModel: AuthViewModel) {
+fun AuthScreen(
+    onAuthSuccess: () -> Unit,
+    onContinueAsGuest: () -> Unit,
+    viewModel: AuthViewModel
+) {
     val authState by viewModel.authState.collectAsState()
     var isLoginMode by remember { mutableStateOf(true) }
     var email by remember { mutableStateOf("") }
@@ -192,7 +197,7 @@ fun AuthScreen(onAuthSuccess: () -> Unit, viewModel: AuthViewModel) {
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             // Switch mode
             Row(
@@ -217,6 +222,26 @@ fun AuthScreen(onAuthSuccess: () -> Unit, viewModel: AuthViewModel) {
                     modifier = Modifier.clickable { isLoginMode = !isLoginMode }
                 )
             }
+
+            Spacer(Modifier.height(16.dp))
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            Spacer(Modifier.height(16.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onContinueAsGuest),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Continue without account".uppercase(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
 
             Spacer(Modifier.height(48.dp))
         }

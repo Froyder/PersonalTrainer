@@ -8,6 +8,7 @@ import com.froyder.personaltrainer.data.model.WorkoutSession
 import com.froyder.personaltrainer.data.repository.FirestoreRepository
 import com.froyder.personaltrainer.data.repository.GeminiRepository
 import com.froyder.personaltrainer.data.repository.LocalRepository
+import com.froyder.personaltrainer.presentation.auth.AuthViewModel
 import com.froyder.personaltrainer.utils.CrashReporter
 import com.froyder.personaltrainer.utils.getCurrentTimeMillis
 import com.froyder.personaltrainer.utils.notifications.NotificationScheduler
@@ -18,12 +19,11 @@ import kotlinx.coroutines.launch
 class AppViewModel(
     private val geminiRepository: GeminiRepository,
     private val localRepository: LocalRepository,
-    private val firestoreRepository: FirestoreRepository = FirestoreRepository()
+    private val firestoreRepository: FirestoreRepository = FirestoreRepository(),
+    private val authViewModel: AuthViewModel? = null
 ) : ViewModel() {
 
-    init {
-
-    }
+    private val isGuestMode get() = authViewModel?.isGuestMode?.value ?: false
 
     private val notificationScheduler = NotificationScheduler()
 
@@ -114,13 +114,13 @@ class AppViewModel(
     }
 
     fun saveUser(user: User) {
-        if (user.id.isBlank()) return
-
         _currentUser.value = user
         localRepository.saveUser(user)
-        viewModelScope.launch {
-            try { firestoreRepository.saveUser(user) }
-            catch (e: Exception) { println("DEBUG: Firestore save user failed: ${e.message}") }
+        if (!isGuestMode) {
+            viewModelScope.launch {
+                try { firestoreRepository.saveUser(user) }
+                catch (e: Exception) { CrashReporter.recordException(e) }
+            }
         }
     }
 
@@ -145,20 +145,11 @@ class AppViewModel(
             try {
                 val newPlan = geminiRepository.generateWorkoutPlan(user)
                 localRepository.savePlan(newPlan)
-                firestoreRepository.savePlan(newPlan)
+                if (!isGuestMode) firestoreRepository.savePlan(newPlan)
                 _planState.value = PlanGenerationState.Success(newPlan)
-
-                if (user.notificationsEnabled) {
-                    notificationScheduler.scheduleForDays(
-                        days = newPlan.weeklyDays.map { it.dayLabel },
-                        hour = user.reminderHour,
-                        minute = user.reminderMinute,
-                        title = "Personal Trainer",
-                        message = "Time to work out! Your session is ready 💪"
-                    )
-                }
             } catch (e: Exception) {
-                _planState.value = PlanGenerationState.Error(e.message ?: "Failed to generate plan")
+                CrashReporter.recordException(e)
+                _planState.value = PlanGenerationState.Error(e.message ?: "Failed")
             }
         }
     }
@@ -193,22 +184,23 @@ class AppViewModel(
             }
         )
         localRepository.savePlan(updatedPlan)
-        viewModelScope.launch {
-            try { firestoreRepository.savePlan(updatedPlan) }
-            catch (e: Exception) { println("DEBUG: Firestore save plan failed: ${e.message}") }
+        if (!isGuestMode) {
+            viewModelScope.launch {
+                try { firestoreRepository.savePlan(updatedPlan) }
+                catch (e: Exception) { CrashReporter.recordException(e) }
+            }
         }
         _planState.value = PlanGenerationState.Success(updatedPlan)
-
-        if (updatedPlan.weeklyDays.all { it.isCompleted }) {
-            regeneratePlan()
-        }
+        if (updatedPlan.weeklyDays.all { it.isCompleted }) regeneratePlan()
     }
 
     fun saveSession(session: WorkoutSession) {
         viewModelScope.launch {
             localRepository.saveSession(session)
-            try { firestoreRepository.saveSession(session) }
-            catch (e: Exception) { println("DEBUG: Firestore save session failed: ${e.message}") }
+            if (!isGuestMode) {
+                try { firestoreRepository.saveSession(session) }
+                catch (e: Exception) { CrashReporter.recordException(e) }
+            }
         }
     }
 

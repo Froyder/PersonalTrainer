@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.froyder.personaltrainer.presentation.auth.AuthViewModel
 import com.froyder.personaltrainer.presentation.theme.ColorScheme
 import com.froyder.personaltrainer.presentation.theme.DarkModePreference
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
@@ -62,11 +64,13 @@ import com.froyder.personaltrainer.utils.screenPadding
 fun MenuScreen(
     scrollState: ScrollState,
     viewModel: MenuViewModel,
+    authViewModel: AuthViewModel,
     themeViewModel: ThemeViewModel,
     userId: String,
     onLogout: () -> Unit,
     onRegeneratePlan: () -> Unit,
-    onDeleteAccount: () -> Unit
+    onDeleteAccount: () -> Unit,
+    onCreateAccount: () -> Unit
 ) {
     val user by viewModel.user.collectAsState()
     var activeDialog by remember { mutableStateOf<String?>(null) }
@@ -178,6 +182,48 @@ fun MenuScreen(
         )
 
         Spacer(Modifier.height(28.dp))
+
+        val isGuest by authViewModel.isGuestMode.collectAsState()
+
+        if (isGuest) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "GUEST MODE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 1.5.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Your data is saved locally only. Sign up to sync across devices and never lose your progress.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = onCreateAccount,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "CREATE ACCOUNT",
+                            letterSpacing = 1.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+        }
 
         // --- Profile Section ---
         MenuSectionHeader("Profile")
@@ -363,20 +409,23 @@ fun MenuScreen(
         Spacer(Modifier.height(24.dp))
 
         // --- Account Section ---
-        MenuSectionHeader("Account")
-        MenuCard {
-            MenuActionRow(
-                label = "Log Out",
-                description = "Sign out of your account",
-                onClick = onLogout
-            )
-            MenuActionRow(
-                label = "Delete Account",
-                description = "Permanently delete your account and data",
-                onClick = { showDeleteConfirmDialog = true },
-                isDestructive = true,
-                showDivider = false
-            )
+        if (!isGuest) {
+            Spacer(Modifier.height(24.dp))
+            MenuSectionHeader("Account")
+            MenuCard {
+                MenuActionRow(
+                    label = "Log Out",
+                    description = "Sign out of your account",
+                    onClick = onLogout
+                )
+                MenuActionRow(
+                    label = "Delete Account",
+                    description = "Permanently delete your account and data",
+                    onClick = { showDeleteConfirmDialog = true },
+                    isDestructive = true,
+                    showDivider = false
+                )
+            }
         }
 
         Spacer(Modifier.height(16.dp))

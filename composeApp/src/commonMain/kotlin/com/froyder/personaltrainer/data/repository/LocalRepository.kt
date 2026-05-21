@@ -57,4 +57,16 @@ class LocalRepository(val settings: Settings) {
     fun getSessionsForPlan(planId: String): List<WorkoutSession> {
         return getCompletedSessions().filter { it.planId == planId }
     }
+
+    fun setGuestMode(isGuest: Boolean) {
+        settings.putBoolean("is_guest_mode", isGuest)
+    }
+
+    fun isGuestMode(): Boolean {
+        return settings.getBooleanOrNull("is_guest_mode") ?: false
+    }
+
+    fun clearGuestMode() {
+        settings.remove("is_guest_mode")
+    }
 }

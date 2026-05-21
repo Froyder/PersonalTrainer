@@ -3,22 +3,40 @@ package com.froyder.personaltrainer.presentation.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.froyder.personaltrainer.data.repository.AuthRepository
+import com.froyder.personaltrainer.data.repository.LocalRepository
 import com.froyder.personaltrainer.utils.CrashReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val localRepository: LocalRepository? = null
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState = _authState.asStateFlow()
 
-    val isLoggedIn: Boolean get() = authRepository.currentUser != null
-    val currentUserId: String get() = authRepository.currentUser?.uid ?: ""
+    private val _isGuestMode = MutableStateFlow(
+        localRepository?.isGuestMode() ?: false  // 👈 load from storage
+    )
+    val isGuestMode = _isGuestMode.asStateFlow()
+
+    val isLoggedIn: Boolean get() = authRepository.currentUser != null || _isGuestMode.value
+    val currentUserId: String get() = authRepository.currentUser?.uid ?:
+                                        if (_isGuestMode.value) "guest_local" else ""
 
     val authStateFlow = authRepository.authStateFlow
+
+    fun continueAsGuest() {
+        _isGuestMode.value = true
+        localRepository?.setGuestMode(true)
+    }
+
+    fun exitGuestMode() {
+        _isGuestMode.value = false
+        localRepository?.clearGuestMode()
+    }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
@@ -66,6 +84,8 @@ class AuthViewModel(
 
     fun reset() {
         _authState.value = AuthState.Idle
+        _isGuestMode.value = false
+        localRepository?.clearGuestMode()
     }
 }
 
