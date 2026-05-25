@@ -161,6 +161,20 @@ pod install
 
 ---
 
+## Testing
+
+Unit tests for core business logic, runnable on JVM:
+
+```bash
+./gradlew :composeApp:jvmTest
+```
+
+**30 tests, 100% passing:**
+- `WorkoutViewModelTest` — 21 tests: exercise navigation, set logging, rest timer, edge cases, negative scenarios
+- `PlanPromptBuilderTest` — 12 tests: prompt generation, user data inclusion, schema validation
+- `LocalRepositoryTest` — 3 tests: user persistence, guest mode save/clear
+- `ComposeAppCommonTest` — 1 test: basic sanity check
+
 ## What I Learned
 
 This project was built as a deep dive into Kotlin Multiplatform in a real-world context. Key takeaways:
