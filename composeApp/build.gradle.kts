@@ -22,6 +22,8 @@ kotlin {
         }
     }
 
+    jvm()
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -68,6 +70,15 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlin.testJunit)
+                implementation(libs.kotlinx.coroutines.test)
+            }
         }
     }
 }

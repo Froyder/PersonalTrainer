@@ -72,7 +72,9 @@ class WorkoutViewModel(
     }
 
     fun setCurrentExercise(index: Int) {
-        _state.update { it.copy(currentExerciseIndex = index) }
+        val maxIndex = _state.value.trainingDay.exercises.size - 1
+        val safeIndex = index.coerceIn(0, maxIndex)
+        _state.update { it.copy(currentExerciseIndex = safeIndex) }
     }
 
     fun completeWorkout(userId: String): WorkoutSession {
