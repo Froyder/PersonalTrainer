@@ -12,6 +12,7 @@ import com.froyder.personaltrainer.presentation.auth.AuthViewModel
 import com.froyder.personaltrainer.utils.CrashReporter
 import com.froyder.personaltrainer.utils.getCurrentTimeMillis
 import com.froyder.personaltrainer.utils.notifications.NotificationScheduler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -20,10 +21,12 @@ class AppViewModel(
     private val geminiRepository: GeminiRepository,
     private val localRepository: LocalRepository,
     private val firestoreRepository: FirestoreRepository = FirestoreRepository(),
-    private val authViewModel: AuthViewModel? = null
+    private val authViewModel: AuthViewModel? = null,
+    private val externalScope: CoroutineScope? = null
 ) : ViewModel() {
 
     private val isGuestMode get() = authViewModel?.isGuestMode?.value ?: false
+    private val scope get() = externalScope ?: viewModelScope
 
     private val notificationScheduler = NotificationScheduler()
 
@@ -42,7 +45,7 @@ class AppViewModel(
     fun initForUser(userId: String) {
         if (userId.isBlank()) return
         CrashReporter.setUserId(userId)
-        viewModelScope.launch {
+        scope.launch {
             _syncState.value = SyncState.Syncing
 
             val cachedUser = localRepository.getUser(userId)
@@ -123,7 +126,7 @@ class AppViewModel(
         _currentUser.value = user
         localRepository.saveUser(user)
         if (!isGuestMode) {
-            viewModelScope.launch {
+            scope.launch {
                 try { firestoreRepository.saveUser(user) }
                 catch (e: Exception) { CrashReporter.recordException(e) }
             }
@@ -131,7 +134,7 @@ class AppViewModel(
     }
 
     fun generatePlan(user: User) {
-        viewModelScope.launch {
+        scope.launch {
             _planState.value = PlanGenerationState.Loading
             try {
                 val plan = geminiRepository.generateWorkoutPlan(user)
@@ -146,7 +149,7 @@ class AppViewModel(
 
     private fun regeneratePlan() {
         val user = _currentUser.value ?: return
-        viewModelScope.launch {
+        scope.launch {
             _planState.value = PlanGenerationState.Loading
             try {
                 val newPlan = geminiRepository.generateWorkoutPlan(user)
@@ -166,7 +169,7 @@ class AppViewModel(
     }
 
     fun loadCachedPlan(userId: String) {
-        viewModelScope.launch {
+        scope.launch {
             val cached = localRepository.getPlanForUser(userId)
             if (cached != null) {
                 _planState.value = PlanGenerationState.Success(cached)
@@ -191,7 +194,7 @@ class AppViewModel(
         )
         localRepository.savePlan(updatedPlan)
         if (!isGuestMode) {
-            viewModelScope.launch {
+            scope.launch {
                 try { firestoreRepository.savePlan(updatedPlan) }
                 catch (e: Exception) { CrashReporter.recordException(e) }
             }
@@ -201,7 +204,7 @@ class AppViewModel(
     }
 
     fun saveSession(session: WorkoutSession) {
-        viewModelScope.launch {
+        scope.launch {
             localRepository.saveSession(session)
             if (!isGuestMode) {
                 try { firestoreRepository.saveSession(session) }
@@ -225,7 +228,7 @@ class AppViewModel(
         localRepository.clearAllData(userId)
         _currentUser.value = null
         _planState.value = PlanGenerationState.Idle
-        viewModelScope.launch {
+        scope.launch {
             try { firestoreRepository.deleteUserData(userId) }
             catch (e: Exception) { println("DEBUG: Firestore delete failed: ${e.message}") }
         }

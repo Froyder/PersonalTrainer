@@ -169,11 +169,20 @@ Unit tests for core business logic, runnable on JVM:
 ./gradlew :composeApp:jvmTest
 ```
 
-**30 tests, 100% passing:**
-- `WorkoutViewModelTest` — 21 tests: exercise navigation, set logging, rest timer, edge cases, negative scenarios
+**41 tests, 100% passing:**
+- `WorkoutViewModelTest` — 21 tests: exercise navigation, set logging, rest timer, edge cases, negative scenarios, out of bounds handling
 - `PlanPromptBuilderTest` — 12 tests: prompt generation, user data inclusion, schema validation
+- `AppViewModelTest` — 4 tests: plan generation success/error states, local persistence, Gemini call count verification (uses MockK)
 - `LocalRepositoryTest` — 3 tests: user persistence, guest mode save/clear
 - `ComposeAppCommonTest` — 1 test: basic sanity check
+
+Testing approach:
+- Pure unit tests for classes with no external dependencies
+- MockK for mocking network layer (GeminiRepository, FirestoreRepository)
+- Real in-memory storage (PropertiesSettings) for repository tests
+- TestScope injection for testing ViewModel coroutines
+
+---
 
 ## What I Learned
 
