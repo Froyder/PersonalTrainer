@@ -36,3 +36,5 @@ iosApp/Podfile.lock
 
 composeApp/src/iosMain/kotlin/com/froyder/personaltrainer/data/remote/ApiConfig.ios.kt
 composeApp/src/androidMain/kotlin/com/froyder/personaltrainer/data/remote/ApiConfig.android.kt
+**/*.aab
+**/*.apk
