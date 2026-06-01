@@ -71,6 +71,26 @@ class WorkoutViewModel(
         }
     }
 
+    fun editSet(exerciseIndex: Int, setNumber: Int, newReps: Int, newWeightKg: Float) {
+        val exerciseId = _state.value.trainingDay.exercises
+            .getOrNull(exerciseIndex)?.id ?: return
+
+        _state.update { current ->
+            val updatedLogs = current.exerciseLogs.map { log ->
+                if (log.exerciseId == exerciseId) {
+                    log.copy(
+                        completedSets = log.completedSets.map { set ->
+                            if (set.setNumber == setNumber) {
+                                set.copy(reps = newReps, weightKg = newWeightKg)
+                            } else set
+                        }
+                    )
+                } else log
+            }
+            current.copy(exerciseLogs = updatedLogs)
+        }
+    }
+
     fun setCurrentExercise(index: Int) {
         val maxIndex = _state.value.trainingDay.exercises.size - 1
         val safeIndex = index.coerceIn(0, maxIndex)

@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -158,7 +159,15 @@ fun WorkoutScreen(
                 viewModel.logSet(state.currentExerciseIndex, setLog)
                 viewModel.startRestTimer(currentExercise.restSeconds)
             },
-            onSkipRest = { viewModel.skipRestTimer() }
+            onSkipRest = { viewModel.skipRestTimer() },
+            onEditSet = { setNumber, newReps, newWeight ->
+                viewModel.editSet(
+                    exerciseIndex = state.currentExerciseIndex,
+                    setNumber = setNumber,
+                    newReps = newReps,
+                    newWeightKg = newWeight
+                )
+            }
         )
 
         Spacer(Modifier.height(24.dp))
@@ -250,7 +259,8 @@ fun ExerciseCard(
     isResting: Boolean,
     restSeconds: Int,
     onLogSet: (SetLog) -> Unit,
-    onSkipRest: () -> Unit
+    onSkipRest: () -> Unit,
+    onEditSet: (setNumber: Int, newReps: Int, newWeightKg: Float) -> Unit  // 👈 add
 ) {
     var repsInput by remember(exercise.id) { mutableStateOf(exercise.reps.toString()) }
     var weightInput by remember(exercise.id) { mutableStateOf("") }
@@ -377,6 +387,20 @@ fun ExerciseCard(
 
                 // Completed sets
                 if (completedSets.isNotEmpty()) {
+                    var editingSet by remember { mutableStateOf<SetLog?>(null) }
+
+                    // Edit dialog
+                    editingSet?.let { set ->
+                        EditSetDialog(
+                            set = set,
+                            onConfirm = { newReps, newWeight ->
+                                onEditSet(set.setNumber, newReps, newWeight)
+                                editingSet = null
+                            },
+                            onDismiss = { editingSet = null }
+                        )
+                    }
+
                     Text(
                         text = "LOGGED SETS",
                         style = MaterialTheme.typography.labelSmall,
@@ -384,9 +408,14 @@ fun ExerciseCard(
                         letterSpacing = 1.5.sp
                     )
                     Spacer(Modifier.height(8.dp))
+
                     completedSets.forEach { set ->
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { editingSet = set }  // 👈 tap to edit
+                                .padding(vertical = 6.dp, horizontal = 4.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -395,18 +424,31 @@ fun ExerciseCard(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Text(
-                                text = buildString {
-                                    append("${set.reps} reps")
-                                    if (set.weightKg > 0) append(" @ ${set.weightKg}kg")
-                                },
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = buildString {
+                                        append("${set.reps} reps")
+                                        if (set.weightKg > 0) append(" @ ${set.weightKg}kg")
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                // Edit hint icon
+                                Text(
+                                    modifier = Modifier.padding(top = 2.dp),
+                                    text = "EDIT",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    letterSpacing = 1.sp,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                )
+                            }
                         }
-                        Spacer(Modifier.height(4.dp))
                     }
+
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
                         color = MaterialTheme.colorScheme.outlineVariant
@@ -587,4 +629,92 @@ fun WorkoutCompletedScreen(onFinish: () -> Unit) {
             )
         }
     }
+}
+
+@Composable
+fun EditSetDialog(
+    set: SetLog,
+    onConfirm: (Int, Float) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var repsInput by remember { mutableStateOf(set.reps.toString()) }
+    var weightInput by remember { mutableStateOf(
+        if (set.weightKg > 0) set.weightKg.toString() else ""
+    )}
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Column {
+                Text(
+                    text = "Edit",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.5.sp
+                )
+                Text(
+                    text = "SET ${set.setNumber}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        },
+        text = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = repsInput,
+                    onValueChange = { repsInput = it },
+                    label = { Text("Reps") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp)
+                )
+                OutlinedTextField(
+                    value = weightInput,
+                    onValueChange = { weightInput = it },
+                    label = { Text("kg (opt)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp)
+                )
+            }
+        },
+        confirmButton = {
+            Box(
+                modifier = Modifier
+                    .clickable {
+                        val reps = repsInput.toIntOrNull() ?: return@clickable
+                        val weight = weightInput.toFloatOrNull() ?: 0f
+                        onConfirm(reps, weight)
+                    }
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    "SAVE",
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+        dismissButton = {
+            Box(
+                modifier = Modifier
+                    .clickable(onClick = onDismiss)
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    "CANCEL",
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    )
 }
