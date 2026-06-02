@@ -20,6 +20,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "gemini_api_key=${{ secrets.GEMINI_API_KEY }}" >> local.properties
+
       - name: Create ApiConfig files
         run: |
           mkdir -p composeApp/src/iosMain/kotlin/com/froyder/personaltrainer/data/remote
