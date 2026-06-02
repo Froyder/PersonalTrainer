@@ -62,6 +62,9 @@ jobs:
       - name: Build release AAB
         run: ./gradlew :composeApp:bundleRelease
 
+      - name: Find AAB
+        run: find . -name "*.aab" 2>/dev/null
+
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
