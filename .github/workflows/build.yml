@@ -69,5 +69,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-aab
-          path: composeApp/release/composeApp-release.aab
+          path: composeApp/build/outputs/bundle/release/composeApp-release.aab
           retention-days: 30
