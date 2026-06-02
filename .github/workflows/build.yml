@@ -1,0 +1,66 @@
+name: Build Release AAB
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "gemini_api_key=${{ secrets.GEMINI_API_KEY }}" >> local.properties
+
+      - name: Create ApiConfig files
+        run: |
+          mkdir -p composeApp/src/iosMain/kotlin/com/froyder/personaltrainer/data/remote
+          mkdir -p composeApp/src/androidMain/kotlin/com/froyder/personaltrainer/data/remote
+          
+          cat > composeApp/src/iosMain/kotlin/com/froyder/personaltrainer/data/remote/ApiConfig.ios.kt << 'EOF'
+          package com.froyder.personaltrainer.data.remote
+          actual fun getGeminiApiKey(): String = "${{ secrets.GEMINI_API_KEY }}"
+          EOF
+          
+          cat > composeApp/src/androidMain/kotlin/com/froyder/personaltrainer/data/remote/ApiConfig.android.kt << 'EOF'
+          package com.froyder.personaltrainer.data.remote
+          actual fun getGeminiApiKey(): String = "${{ secrets.GEMINI_API_KEY }}"
+          EOF
+
+      - name: Create keystore file
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
+
+      - name: Create signing properties in local.properties
+        run: |
+          echo "KEYSTORE_PATH=${{ github.workspace }}/keystore.jks" >> local.properties
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> local.properties
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> local.properties
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build release AAB
+        run: ./gradlew :composeApp:bundleRelease
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: composeApp/release/composeApp-release.aab
+          retention-days: 30
