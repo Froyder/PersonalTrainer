@@ -92,8 +92,8 @@ android {
         applicationId = "com.froyder.personaltrainer"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.5"
 
         buildConfigField(
             "String", "GEMINI_API_KEY", "\"${localProperties["gemini_api_key"]}\""
