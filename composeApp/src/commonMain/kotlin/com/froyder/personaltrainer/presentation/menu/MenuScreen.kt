@@ -57,6 +57,7 @@ import com.froyder.personaltrainer.presentation.theme.ColorScheme
 import com.froyder.personaltrainer.presentation.theme.DarkModePreference
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.theme.resolveColorScheme
+import com.froyder.personaltrainer.utils.isAndroid
 import com.froyder.personaltrainer.utils.isSystemDarkMode
 import com.froyder.personaltrainer.utils.openUrl
 import com.froyder.personaltrainer.utils.screenPadding
@@ -432,14 +433,20 @@ fun MenuScreen(
                 },
                 showDivider = true
             )
-            MenuActionRow(
-                label = "Rate the App",
-                description = "Enjoying the app? Leave us a review!",
-                onClick = {
-                    openUrl("market://details?id=com.froyder.personaltrainer")
-                },
-                showDivider = false
-            )
+            if (isAndroid()) {
+                MenuActionRow(
+                    label = "Rate the App",
+                    description = "Enjoying the app? Leave us a review!",
+                    onClick = {
+                        val rateUrl = if (isAndroid())
+                            "market://details?id=com.froyder.personaltrainer"
+                        else
+                            "https://apps.apple.com/app/APP_ID"
+                        openUrl(rateUrl)
+                    },
+                    showDivider = false
+                )
+            }
         }
 
         // --- Account Section ---

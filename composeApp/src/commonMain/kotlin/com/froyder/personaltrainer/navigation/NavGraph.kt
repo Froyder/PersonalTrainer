@@ -58,6 +58,7 @@ import com.froyder.personaltrainer.presentation.splash.SplashScreen
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.workout.WorkoutScreen
 import com.froyder.personaltrainer.utils.NetworkMonitor
+import com.froyder.personaltrainer.utils.isAndroid
 import com.froyder.personaltrainer.utils.openUrl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -261,7 +262,11 @@ fun NavGraph(
                         onRate = {
                             appViewModel.markRatingDialogShown()
                             showRatingDialog = false
-                            openUrl("market://details?id=com.froyder.personaltrainer")
+                            val rateUrl = if (isAndroid())
+                                "market://details?id=com.froyder.personaltrainer"
+                            else
+                                "https://apps.apple.com/app/APP_ID"
+                            openUrl(rateUrl)
                         },
                         onLater = {
                             showRatingDialog = false

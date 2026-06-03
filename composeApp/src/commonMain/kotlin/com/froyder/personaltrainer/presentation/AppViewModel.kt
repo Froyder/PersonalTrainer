@@ -11,6 +11,7 @@ import com.froyder.personaltrainer.data.repository.LocalRepository
 import com.froyder.personaltrainer.presentation.auth.AuthViewModel
 import com.froyder.personaltrainer.utils.CrashReporter
 import com.froyder.personaltrainer.utils.getCurrentTimeMillis
+import com.froyder.personaltrainer.utils.isAndroid
 import com.froyder.personaltrainer.utils.notifications.NotificationScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -265,6 +266,7 @@ class AppViewModel(
 
     fun shouldShowRatingDialog(): Boolean {
         if (isGuestMode) return false  // don't ask guests to rate
+        if (!isAndroid()) return false // iOS not on App Store yet
         return localRepository.shouldShowRatingDialog()
     }
 
