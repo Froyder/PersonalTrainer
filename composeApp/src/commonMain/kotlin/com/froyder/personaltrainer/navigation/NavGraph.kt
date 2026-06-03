@@ -47,6 +47,7 @@ import com.froyder.personaltrainer.presentation.auth.AuthViewModel
 import com.froyder.personaltrainer.presentation.auth.GuestUpgradeScreen
 import com.froyder.personaltrainer.presentation.common.EmptyPlanScreen
 import com.froyder.personaltrainer.presentation.common.OfflineBanner
+import com.froyder.personaltrainer.presentation.common.RatingDialog
 import com.froyder.personaltrainer.presentation.menu.MenuScreen
 import com.froyder.personaltrainer.presentation.menu.MenuViewModel
 import com.froyder.personaltrainer.presentation.onboarding.LevelPickerScreen
@@ -57,6 +58,7 @@ import com.froyder.personaltrainer.presentation.splash.SplashScreen
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.workout.WorkoutScreen
 import com.froyder.personaltrainer.utils.NetworkMonitor
+import com.froyder.personaltrainer.utils.openUrl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -246,18 +248,32 @@ fun NavGraph(
                 )
             }
             composable(Screen.Home.route) {
-                val plan = (planState as? PlanGenerationState.Success)?.plan
-                    ?: MockData.samplePlan
-                HomeScreen(
-                    user = currentUser,
-                    plan = plan,
-                    onStartWorkout = { dayIndex ->
-                        appViewModel.selectDay(dayIndex)
-                        navController.navigate(Screen.Workout.route)
+                var showRatingDialog by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    if (appViewModel.shouldShowRatingDialog()) {
+                        showRatingDialog = true
                     }
-                )
-            }
-            composable(Screen.Home.route) {
+                }
+
+                if (showRatingDialog) {
+                    RatingDialog(
+                        onRate = {
+                            appViewModel.markRatingDialogShown()
+                            showRatingDialog = false
+                            openUrl("market://details?id=com.froyder.personaltrainer")
+                        },
+                        onLater = {
+                            showRatingDialog = false
+                            // Don't mark as shown — ask again next time
+                        },
+                        onDismiss = {
+                            appViewModel.markRatingDialogShown()  // don't show again if dismissed
+                            showRatingDialog = false
+                        }
+                    )
+                }
+
                 when (val state = planState) {
                     is PlanGenerationState.Loading -> {
                         LoadingScreen(

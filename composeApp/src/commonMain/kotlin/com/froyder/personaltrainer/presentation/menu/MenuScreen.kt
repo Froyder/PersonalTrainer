@@ -58,6 +58,7 @@ import com.froyder.personaltrainer.presentation.theme.DarkModePreference
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.theme.resolveColorScheme
 import com.froyder.personaltrainer.utils.isSystemDarkMode
+import com.froyder.personaltrainer.utils.openUrl
 import com.froyder.personaltrainer.utils.screenPadding
 
 @Composable
@@ -419,6 +420,27 @@ fun MenuScreen(
         }
 
         Spacer(Modifier.height(24.dp))
+
+        // --- Support Section ---
+        MenuSectionHeader("Support")
+        MenuCard {
+            MenuActionRow(
+                label = "Send Feedback",
+                description = "Report a bug or suggest a feature",
+                onClick = {
+                    openUrl("mailto:homutskih@gmail.com?subject=Personal Trainer Feedback")
+                },
+                showDivider = true
+            )
+            MenuActionRow(
+                label = "Rate the App",
+                description = "Enjoying the app? Leave us a review!",
+                onClick = {
+                    openUrl("market://details?id=com.froyder.personaltrainer")
+                },
+                showDivider = false
+            )
+        }
 
         // --- Account Section ---
         if (!isGuest) {

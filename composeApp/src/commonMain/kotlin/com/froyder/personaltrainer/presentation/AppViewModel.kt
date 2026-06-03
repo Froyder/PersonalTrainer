@@ -262,6 +262,15 @@ class AppViewModel(
         }
         return streak
     }
+
+    fun shouldShowRatingDialog(): Boolean {
+        if (isGuestMode) return false  // don't ask guests to rate
+        return localRepository.shouldShowRatingDialog()
+    }
+
+    fun markRatingDialogShown() {
+        localRepository.markRatingDialogShown()
+    }
 }
 
 sealed class PlanGenerationState {

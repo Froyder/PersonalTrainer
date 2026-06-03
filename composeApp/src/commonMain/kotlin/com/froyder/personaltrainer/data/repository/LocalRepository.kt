@@ -72,4 +72,14 @@ class LocalRepository(val settings: Settings) {
     fun clearGuestMode() {
         settings.remove("is_guest_mode")
     }
+
+    fun shouldShowRatingDialog(): Boolean {
+        val shown = settings.getBooleanOrNull("rating_dialog_shown") ?: false
+        val completedCount = getCompletedSessions().size
+        return !shown && completedCount >= 3
+    }
+
+    fun markRatingDialogShown() {
+        settings.putBoolean("rating_dialog_shown", true)
+    }
 }
