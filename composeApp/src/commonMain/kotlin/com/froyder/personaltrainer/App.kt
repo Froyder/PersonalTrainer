@@ -17,6 +17,7 @@ import com.froyder.personaltrainer.presentation.theme.DarkModePreference
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.theme.resolveColorScheme
 import com.froyder.personaltrainer.utils.isSystemDarkMode
+import io.github.froyder.networkmonitor.NetworkMonitorProvider
 
 @Composable
 fun App(localRepository: LocalRepository) {
@@ -65,7 +66,10 @@ fun App(localRepository: LocalRepository) {
             }
         }
 
+        val connectionState by NetworkMonitorProvider.connectionState.collectAsState()
+
         NavGraph(
+            connectionState = connectionState,
             onboardingViewModel = onboardingViewModel,
             appViewModel = appViewModel,
             authViewModel = authViewModel,

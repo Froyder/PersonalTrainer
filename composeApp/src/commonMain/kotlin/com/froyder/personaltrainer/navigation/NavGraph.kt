@@ -57,10 +57,9 @@ import com.froyder.personaltrainer.presentation.progress.ProgressScreen
 import com.froyder.personaltrainer.presentation.splash.SplashScreen
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.workout.WorkoutScreen
-import com.froyder.personaltrainer.utils.NetworkMonitor
 import com.froyder.personaltrainer.utils.isAndroid
 import com.froyder.personaltrainer.utils.openUrl
-import kotlinx.coroutines.delay
+import io.github.froyder.networkmonitor.ConnectionState
 import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
@@ -80,6 +79,7 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun NavGraph(
+    connectionState: ConnectionState,
     onboardingViewModel: OnboardingViewModel,
     appViewModel: AppViewModel,
     authViewModel: AuthViewModel,
@@ -101,23 +101,13 @@ fun NavGraph(
     val progressScrollState = rememberScrollState()
     val menuScrollState = rememberScrollState()
 
-    val networkMonitor = remember { NetworkMonitor() }
-    var isOnline by remember { mutableStateOf(networkMonitor.isConnected()) }
-
     LaunchedEffect(Unit) {
         onNavControllerReady(navController)
     }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            isOnline = networkMonitor.isConnected()
-            delay(3000)
-        }
-    }
-
     Scaffold(
         topBar = {
-            OfflineBanner(isVisible = !isOnline)
+            OfflineBanner(isVisible = connectionState is ConnectionState.Disconnected)
         },
         bottomBar = {
             if (showBottomBar) {

@@ -67,6 +67,7 @@ kotlin {
             implementation(libs.multiplatform.settings.serialization)
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
+            implementation(libs.kmp.network.monitor)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

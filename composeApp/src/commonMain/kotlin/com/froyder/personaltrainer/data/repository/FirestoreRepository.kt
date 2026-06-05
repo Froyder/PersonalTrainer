@@ -3,20 +3,21 @@ package com.froyder.personaltrainer.data.repository
 import com.froyder.personaltrainer.data.WorkoutPlan
 import com.froyder.personaltrainer.data.model.User
 import com.froyder.personaltrainer.data.model.WorkoutSession
-import com.froyder.personaltrainer.utils.NetworkMonitor
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
+import io.github.froyder.networkmonitor.ConnectionState
+import io.github.froyder.networkmonitor.NetworkMonitorProvider
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 
-class FirestoreRepository(
-    private val networkMonitor: NetworkMonitor = NetworkMonitor()
-) {
+class FirestoreRepository() {
 
     private val firestore = Firebase.firestore
     private val json = Json { ignoreUnknownKeys = true }
 
-    private fun checkConnection() {
-        if (!networkMonitor.isConnected()) {
+    private suspend fun checkConnection() {
+        val state = NetworkMonitorProvider.connectionState.first { it !is ConnectionState.Unknown }
+        if (state is ConnectionState.Disconnected) {
             throw Exception("No internet connection")
         }
     }

@@ -1,7 +1,7 @@
 [versions]
 agp = "8.11.2"
 android-compileSdk = "36"
-android-minSdk = "24"
+android-minSdk = "26"
 android-targetSdk = "36"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
@@ -21,6 +21,7 @@ gitlive-firebase = "2.1.0"
 firebase-bom = "33.1.0"
 firebaseCrashlyticsKtx = "20.0.6"
 mockk = "1.13.10"
+kmp-network-monitor = "1.0.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -56,6 +57,7 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.8.1" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+kmp-network-monitor = { module = "io.github.froyder:kmp-network-monitor", version.ref = "kmp-network-monitor" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

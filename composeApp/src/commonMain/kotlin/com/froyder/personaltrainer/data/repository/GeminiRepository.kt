@@ -9,18 +9,18 @@ import com.froyder.personaltrainer.data.remote.GeminiPart
 import com.froyder.personaltrainer.data.remote.GeminiRequest
 import com.froyder.personaltrainer.data.remote.GeminiResponse
 import com.froyder.personaltrainer.data.remote.buildPlanPrompt
-import com.froyder.personaltrainer.utils.NetworkMonitor
 import com.froyder.personaltrainer.utils.getCurrentTimeMillis
+import io.github.froyder.networkmonitor.ConnectionState
+import io.github.froyder.networkmonitor.NetworkMonitorProvider
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 
 class GeminiRepository(
-    private val client: HttpClient,
-    private val networkMonitor: NetworkMonitor = NetworkMonitor()
+    private val client: HttpClient
 ) {
 
     private val json = Json {
@@ -29,7 +29,8 @@ class GeminiRepository(
     }
 
     suspend fun generateWorkoutPlan(user: User): WorkoutPlan {
-        if (!networkMonitor.isConnected()) {
+        val state = NetworkMonitorProvider.connectionState.first { it !is ConnectionState.Unknown }
+        if (state is ConnectionState.Disconnected) {
             throw Exception("No internet connection. Please check your network and try again.")
         }
         return doGenerateWorkoutPlan(user)
