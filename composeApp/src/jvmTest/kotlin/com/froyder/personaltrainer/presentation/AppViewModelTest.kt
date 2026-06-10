@@ -22,6 +22,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import io.github.froyder.kmpinappreview.ReviewManager
+
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppViewModelTest {
@@ -57,6 +59,7 @@ class AppViewModelTest {
         viewModel = AppViewModel(
             geminiRepository = mockGemini,
             localRepository = localRepo,
+            reviewManager = ReviewManager(),
             firestoreRepository = mockFirestore,
             externalScope = testScope
         )
