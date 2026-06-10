@@ -68,7 +68,7 @@ kotlin {
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
             implementation(libs.kmp.network.monitor)
-            implementation("io.github.froyder:kmp-inapp-review:0.1.0-local")
+            implementation("io.github.froyder:kmp-inapp-review:1.0.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
