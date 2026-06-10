@@ -47,7 +47,6 @@ import com.froyder.personaltrainer.presentation.auth.AuthViewModel
 import com.froyder.personaltrainer.presentation.auth.GuestUpgradeScreen
 import com.froyder.personaltrainer.presentation.common.EmptyPlanScreen
 import com.froyder.personaltrainer.presentation.common.OfflineBanner
-import com.froyder.personaltrainer.presentation.common.RatingDialog
 import com.froyder.personaltrainer.presentation.menu.MenuScreen
 import com.froyder.personaltrainer.presentation.menu.MenuViewModel
 import com.froyder.personaltrainer.presentation.onboarding.LevelPickerScreen
@@ -57,8 +56,6 @@ import com.froyder.personaltrainer.presentation.progress.ProgressScreen
 import com.froyder.personaltrainer.presentation.splash.SplashScreen
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.workout.WorkoutScreen
-import com.froyder.personaltrainer.utils.isAndroid
-import com.froyder.personaltrainer.utils.openUrl
 import io.github.froyder.networkmonitor.ConnectionState
 import kotlinx.coroutines.launch
 
@@ -239,34 +236,10 @@ fun NavGraph(
                 )
             }
             composable(Screen.Home.route) {
-                var showRatingDialog by remember { mutableStateOf(false) }
-
                 LaunchedEffect(Unit) {
                     if (appViewModel.shouldShowRatingDialog()) {
-                        showRatingDialog = true
+                        appViewModel.requestReview()
                     }
-                }
-
-                if (showRatingDialog) {
-                    RatingDialog(
-                        onRate = {
-                            appViewModel.markRatingDialogShown()
-                            showRatingDialog = false
-                            val rateUrl = if (isAndroid())
-                                "market://details?id=com.froyder.personaltrainer"
-                            else
-                                "https://apps.apple.com/app/APP_ID"
-                            openUrl(rateUrl)
-                        },
-                        onLater = {
-                            showRatingDialog = false
-                            // Don't mark as shown — ask again next time
-                        },
-                        onDismiss = {
-                            appViewModel.markRatingDialogShown()  // don't show again if dismissed
-                            showRatingDialog = false
-                        }
-                    )
                 }
 
                 when (val state = planState) {

@@ -17,10 +17,14 @@ import com.froyder.personaltrainer.presentation.theme.DarkModePreference
 import com.froyder.personaltrainer.presentation.theme.ThemeViewModel
 import com.froyder.personaltrainer.presentation.theme.resolveColorScheme
 import com.froyder.personaltrainer.utils.isSystemDarkMode
+import io.github.froyder.kmpinappreview.ReviewManager
 import io.github.froyder.networkmonitor.NetworkMonitorProvider
 
 @Composable
-fun App(localRepository: LocalRepository) {
+fun App(
+    localRepository: LocalRepository,
+    reviewManager: ReviewManager
+) {
     val themeViewModel = viewModel { ThemeViewModel(localRepository.settings) }
     val preferences by themeViewModel.preferences.collectAsState()
     val systemDark = isSystemDarkMode()
@@ -42,6 +46,7 @@ fun App(localRepository: LocalRepository) {
             AppViewModel(
                 geminiRepository = GeminiRepository(createHttpClient()),
                 localRepository = localRepository,
+                reviewManager = reviewManager,
                 authViewModel = authViewModel
             )
         }

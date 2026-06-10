@@ -11,16 +11,17 @@ import com.froyder.personaltrainer.data.repository.LocalRepository
 import com.froyder.personaltrainer.presentation.auth.AuthViewModel
 import com.froyder.personaltrainer.utils.CrashReporter
 import com.froyder.personaltrainer.utils.getCurrentTimeMillis
-import com.froyder.personaltrainer.utils.isAndroid
 import com.froyder.personaltrainer.utils.notifications.NotificationScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import io.github.froyder.kmpinappreview.ReviewManager
 
 class AppViewModel(
     private val geminiRepository: GeminiRepository,
     private val localRepository: LocalRepository,
+    private val reviewManager: ReviewManager,
     private val firestoreRepository: FirestoreRepository = FirestoreRepository(),
     private val authViewModel: AuthViewModel? = null,
     private val externalScope: CoroutineScope? = null
@@ -265,9 +266,19 @@ class AppViewModel(
     }
 
     fun shouldShowRatingDialog(): Boolean {
-        if (isGuestMode) return false  // don't ask guests to rate
-        if (!isAndroid()) return false // iOS not on App Store yet
+        if (isGuestMode) return false
         return localRepository.shouldShowRatingDialog()
+    }
+
+    fun requestReview() {
+        viewModelScope.launch {
+            try {
+                reviewManager.requestReview()
+                markRatingDialogShown()
+            } catch (e: Exception) {
+                // silently ignore
+            }
+        }
     }
 
     fun markRatingDialogShown() {

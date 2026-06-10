@@ -7,6 +7,7 @@ import com.froyder.personaltrainer.data.local.appContext
 import com.froyder.personaltrainer.data.local.createSettings
 import com.froyder.personaltrainer.data.repository.LocalRepository
 import com.google.firebase.FirebaseApp
+import io.github.froyder.kmpinappreview.ReviewManager
 import io.github.froyder.networkmonitor.NetworkMonitorInitializer
 
 lateinit var mainActivity: MainActivity
@@ -33,7 +34,10 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            App(localRepository = localRepository)
+            App(
+                localRepository = localRepository,
+                reviewManager = ReviewManager(this)
+            )
         }
     }
 }
