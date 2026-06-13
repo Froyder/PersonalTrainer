@@ -68,7 +68,7 @@ kotlin {
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
             implementation(libs.kmp.network.monitor)
-            implementation("io.github.froyder:kmp-inapp-review:1.0.0")
+            implementation("io.github.froyder:kmp-inapp-review:1.0.1")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -94,8 +94,8 @@ android {
         applicationId = "com.froyder.personaltrainer"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 9
-        versionName = "1.0.9"
+        versionCode = 10
+        versionName = "1.1.0"
 
         buildConfigField(
             "String", "GEMINI_API_KEY", "\"${localProperties["gemini_api_key"]}\""
