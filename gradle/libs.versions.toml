@@ -21,7 +21,8 @@ gitlive-firebase = "2.1.0"
 firebase-bom = "33.1.0"
 firebaseCrashlyticsKtx = "20.0.6"
 mockk = "1.13.10"
-kmp-network-monitor = "1.0.0"
+kmp-network-monitor = "1.0.1"
+kmp-inapp-review = "1.0.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -58,6 +59,7 @@ firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-cra
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.8.1" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 kmp-network-monitor = { module = "io.github.froyder:kmp-network-monitor", version.ref = "kmp-network-monitor" }
+kmp-inapp-review = { module = "io.github.froyder:kmp-inapp-review", version.ref = "kmp-inapp-review" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
